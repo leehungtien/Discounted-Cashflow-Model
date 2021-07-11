@@ -50,8 +50,6 @@ for i in reversed(range(1, YEARS + 1)):
 
 # Weighted Average Cost to Capital
 def weighedAverageCostToCaptial():
-    totalDebts = []
-    debtRates = []
 
     # Prompt User for Interest Expense (Can be obtained from Income Statement on Yahoo Finance)
     interestExpense = int(input("Enter Interest Expense from Income Statement: "))
@@ -62,10 +60,14 @@ def weighedAverageCostToCaptial():
     # Prompt User for Long Term Debt (Can be obtained from Balance Sheet on Yahoo Finance)
     longTermDebt = int(input("Enter Long Term Debt from Balance Sheet: "))
 
-    totalDebts.append(currentDebt + longTermDebt) 
-    for i in range(len(totalDebts)):
-        if i < len(totalDebts):
-            debtRates.append(totalDebts[i + 1] / totalDebts[i])
-
-    debtRate = mean(debtRates)
+    debtRate = interestExpense / (currentDebt + longTermDebt)
     
+    incomebeforeTax = int(input('Enter Income Before Text from Income Statement: '))
+    incomeTaxExpense = int(input('Enter Income Tax Expense from Income Statement: '))
+    effectiveTaxRate = incomeTaxExpense / incomebeforeTax
+    costofDebt = debtRate * (1 - effectiveTaxRate)
+
+    def capitalAssetPricingModel():
+        riskFreeRate = int(input('Enter 10 Year US Treasury Bond Rates from Yahoo Finance as Risk Free Rate: '))
+        beta = int(input('Enter Beta Value from Yahoo Finance: '))
+   
