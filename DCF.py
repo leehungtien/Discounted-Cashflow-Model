@@ -1,6 +1,4 @@
-import pandas as pd
-import yfinance as yf
-import datetime
+from datetime import date
 from statistics import mean
 
 # Global variable for years of projection
@@ -9,14 +7,16 @@ YEARS = 2
 # Global Variable for stock margin of safety
 MARGIN_OF_SAFETY = 0.1
 
+CURRENT_YEAR = date.today().year 
+
 # Prompt user for company ticker symbol
 company = str(input("Please enter company's ticker symbol: "))
 
 # Obtain Free Cash Flow Data from user (Can be obtained on Yahoo Finance)
-cashFlow = list(map(lambda x: float(x), input("Key in Free Cash Flow of the format 'Current Year - 3 Current Year - 2 Current Year - 1': ").split()))
+cashFlow = list(map(lambda x: float(x), input(f"Key in Free Cash Flow of the format '{CURRENT_YEAR - 3} {CURRENT_YEAR - 2} {CURRENT_YEAR - 1}': ").split()))
 
 # Obtain Net Income Data from user (Can be obtained on Yahoo Finance)
-netIncome = list(map(lambda x: float(x), input("Key in Net Income of the format 'Current Year - 3 Current Year - 2 Current Year - 1': ").split()))
+netIncome = list(map(lambda x: float(x), input(f"Key in Net Income of the format '{CURRENT_YEAR - 3} {CURRENT_YEAR - 2} {CURRENT_YEAR - 1}': ").split()))
 
 # Calculate Free Cash Flow to Net Income Ratio
 FCF_NI_ratios = []
@@ -27,7 +27,7 @@ for i in range(len(cashFlow)):
 FCF_NI = mean(FCF_NI_ratios)
 
 # Prompt for Total Revenue (Can be obtained on Yahoo Finance)
-totalRevenue =  list(map(lambda x: float(x), input("Key in Total Revenue of the format 'Current Year - 3 Current Year - 2 Current Year - 1 Analyst Estimates': ").split()))
+totalRevenue =  list(map(lambda x: float(x), input(f"Key in Total Revenue of the format '{CURRENT_YEAR - 3} {CURRENT_YEAR - 2} {CURRENT_YEAR - 1} Analyst Estimates': ").split()))
 
 # Calculate Revenue Growth Rate
 growthRates = []
@@ -119,4 +119,3 @@ intrinsicValue = todaysValue / sharesOutstanding
 print(f'''#############################################
 INTRINISC VALUE OF {company} is: {intrinsicValue}
 BUY IN PRICE SHOULD BE {(1 - MARGIN_OF_SAFETY) * intrinsicValue}''')
-
