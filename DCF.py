@@ -4,7 +4,10 @@ import datetime
 from statistics import mean
 
 # Global variable for years of projection
-YEARS = 3
+YEARS = 2
+
+# Global Variable for stock margin of safety
+MARGIN_OF_SAFETY = 0.1
 
 # Prompt user for company ticker symbol
 company = str(input("Please enter company's ticker symbol: "))
@@ -21,7 +24,7 @@ for i in range(len(cashFlow)):
     if (i + 1 == len(cashFlow)):
         break
     FCF_NI_ratios.append(netIncome[i + 1] / cashFlow[i])
-FCF_NI = min(FCF_NI_ratios)
+FCF_NI = mean(FCF_NI_ratios)
 
 # Prompt for Total Revenue (Can be obtained on Yahoo Finance)
 totalRevenue =  list(map(lambda x: float(x), input("Key in Total Revenue of the format 'Current Year - 3 Current Year - 2 Current Year - 1 Analyst Estimates': ").split()))
@@ -32,11 +35,11 @@ for i in range(len(totalRevenue)):
     if (i + 1 == len(totalRevenue)):
         break
     growthRates.append(totalRevenue[i + 1] / totalRevenue[i])
-growthRate = min(growthRates)
+growthRate = mean(growthRates)
 
 # Project Total Revenue for YEARS
 for i in range(YEARS):
-    totalRevenue.append(totalRevenue[-i] * growthRate)
+    totalRevenue.append(totalRevenue[-1] * growthRate)
 
 # Calculate Net Income Margins
 NI_margins = []
@@ -44,7 +47,7 @@ for i in range(len(netIncome)):
     if (i + 1 == len(netIncome)):
         break
     NI_margins.append(netIncome[i + 1] / totalRevenue[i])
-NI_margin = 1 + min(NI_margins)
+NI_margin = mean(NI_margins)
 
 # Projected Net Income
 for i in reversed(range(1, YEARS + 1)):
@@ -55,7 +58,7 @@ for i in reversed(range(1, YEARS + 1)):
     cashFlow.append(netIncome[-i] * FCF_NI)
 
 # Weighted Average Cost to Capital
-def weighedAverageCostToCaptial():
+def weighedAverageCostToCapital():
 
     # Prompt User for Interest Expense (Can be obtained from Income Statement on Yahoo Finance)
     interestExpense = float(input("Enter Interest Expense from Income Statement: "))
@@ -65,6 +68,7 @@ def weighedAverageCostToCaptial():
 
     # Prompt User for Long Term Debt (Can be obtained from Balance Sheet on Yahoo Finance)
     longTermDebt = float(input("Enter Long Term Debt from Balance Sheet: "))
+
     totalDebt = currentDebt + longTermDebt
 
     debtRate = interestExpense / totalDebt
@@ -81,16 +85,18 @@ def weighedAverageCostToCaptial():
         return riskFreeRate + beta * (expectedMarketReturn - riskFreeRate)
 
     marketCap = float(input('Enter Market Cap of company: '))
-    weightDebt = round(totalDebt / (totalDebt + marketCap))
-    weightEquity = round(marketCap / (totalDebt + marketCap))
-    return weightDebt * costofDebt + weightEquity * capitalAssetPricingModel()
+    weightDebt = totalDebt / (totalDebt + marketCap)
+    weightEquity = marketCap / (totalDebt + marketCap)
+    return (weightDebt * costofDebt + weightEquity * capitalAssetPricingModel()) / 100
 
-rateOfReturn = weighedAverageCostToCaptial()
+rateOfReturn = weighedAverageCostToCapital()
 sharesOutstanding = float(input('Enter Shares Outstanding from 10K (Note if the shares are in thousands and change to match data set): '))
 perpetualGrowthRate = float(input('Enter Perpetual Growth Rate in percent (2.5% is a good rate): ')) / 100
+sharesOutstanding = 4601075
+perpetualGrowthRate = 2.5 / 100
 
 # Calculate the Free Cash Flow at the END of the 4th Year Projection
-terminalValue = totalRevenue[-1] * (1 + perpetualGrowthRate) / (rateOfReturn - perpetualGrowthRate)
+terminalValue = cashFlow[-1] * (1 + perpetualGrowthRate) / (rateOfReturn - perpetualGrowthRate)
 cashFlow.append(terminalValue)
 
 discountFactor = []
@@ -111,5 +117,6 @@ for i in range(2, len(cashFlow)):
 
 intrinsicValue = todaysValue / sharesOutstanding
 print(f'''#############################################
-INTRINISC VALUE OF {company} is: {intrinsicValue}''')
+INTRINISC VALUE OF {company} is: {intrinsicValue}
+BUY IN PRICE SHOULD BE {(1 - MARGIN_OF_SAFETY) * intrinsicValue}''')
 
