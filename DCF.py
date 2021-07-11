@@ -32,7 +32,7 @@ growthRate = min(growthRates)
 
 # Project Total Revenue for YEARS
 for i in range(YEARS):
-    totalRevenue.append(totalRevenue[-1] * growthRate)
+    totalRevenue.append(totalRevenue[-i] * growthRate)
 
 # Calculate Net Income Margins
 NI_margins = []
@@ -59,8 +59,9 @@ def weighedAverageCostToCaptial():
 
     # Prompt User for Long Term Debt (Can be obtained from Balance Sheet on Yahoo Finance)
     longTermDebt = int(input("Enter Long Term Debt from Balance Sheet: "))
+    totalDebt = currentDebt + longTermDebt
 
-    debtRate = interestExpense / (currentDebt + longTermDebt)
+    debtRate = interestExpense / totalDebt
     
     incomebeforeTax = int(input('Enter Income Before Text from Income Statement: '))
     incomeTaxExpense = int(input('Enter Income Tax Expense from Income Statement: '))
@@ -70,4 +71,27 @@ def weighedAverageCostToCaptial():
     def capitalAssetPricingModel():
         riskFreeRate = int(input('Enter 10 Year US Treasury Bond Rates from Yahoo Finance as Risk Free Rate: '))
         beta = int(input('Enter Beta Value from Yahoo Finance: '))
-   
+        expectedMarketReturn = int(input('Enter the expected Market Return (10 Yr Average return of S&P500): '))
+        return riskFreeRate + beta * (expectedMarketReturn - riskFreeRate)
+
+    marketCap = int(input('Enter Market Cap of company: '))
+    weightDebt = round(totalDebt / (totalDebt + marketCap))
+    weightEquity = round(marketCap / (totalDebt + marketCap))
+    return weightDebt * costofDebt + weightEquity * capitalAssetPricingModel()
+
+rateOfReturn = weighedAverageCostToCaptial()
+sharesOutstanding = int(input('Enter Shares Outstanding from 10K: '))
+perpetualGrowthRate = int(input('Enter Perpetual Growth Rate in percent (2.5% is a good rate): ')) / 100
+
+# Calculate the Free Cash Flow at the END of the 4th Year Projection
+terminalValue = totalRevenue[-1] * (1 + perpetualGrowthRate) / (rateOfReturn - perpetualGrowthRate)
+cashFlow.append(terminalValue)
+
+discountFactor = []
+
+# Current Year cash flow info is at index 2
+for i in range(2, len(cashFlow)):
+    discountFactor.append((1 + rateOfReturn) ** i)
+
+
+
